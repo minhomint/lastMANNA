@@ -443,10 +443,10 @@
                                 )}
                             </div>
 
-                            {/* Right Column - Calendar and Memo */}
-                            <div className="space-y-6">
-                                {/* Calendar */}
+                            {/* Right Column - Calendar with Memo */}
+                            <div>
                                 <div className="bg-white rounded-lg shadow-lg p-4">
+                                    {/* Calendar Header */}
                                     <div className="flex items-center justify-between mb-3">
                                         <button onClick={() => changeMonth(-1)} className="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm">
                                             ◀
@@ -466,6 +466,7 @@
                                         </div>
                                     </div>
 
+                                    {/* Calendar Grid */}
                                     <div className="grid grid-cols-7 gap-1 mb-1">
                                         <div className="text-center text-xs font-semibold text-red-500 py-1">일</div>
                                         <div className="text-center text-xs font-semibold text-gray-600 py-1">월</div>
@@ -476,7 +477,7 @@
                                         <div className="text-center text-xs font-semibold text-blue-600 py-1">토</div>
                                     </div>
 
-                                    <div className="grid grid-cols-7 gap-1">
+                                    <div className="grid grid-cols-7 gap-1 mb-4">
                                         {monthCalendar.map((item) => 
                                             item.empty ? (
                                                 <div key={item.key} className="p-1"></div>
@@ -498,7 +499,8 @@
                                         )}
                                     </div>
 
-                                    <div className="mt-3 text-xs space-y-1">
+                                    {/* Legend */}
+                                    <div className="mb-4 pb-4 border-b border-gray-200 text-xs space-y-1">
                                         <div className="flex items-center gap-2">
                                             <div className="w-3 h-3 bg-green-100 rounded"></div>
                                             <span>작성 완료</span>
@@ -508,32 +510,35 @@
                                             <span>미작성</span>
                                         </div>
                                     </div>
-                                </div>
 
-                                {/* Memo */}
-                                <div className="bg-white rounded-lg shadow-md p-4">
-                                    <h3 className="text-sm font-semibold text-gray-800 mb-2">📌 간단 메모</h3>
-                                    {currentDate ? (
-                                        <div>
-                                            <div className="text-xs text-gray-600 mb-2">
-                                                {currentDate}-{dayOfWeek}
+                                    {/* Memo Section - Integrated below calendar */}
+                                    <div className="pt-3">
+                                        <h3 className="text-sm font-semibold text-gray-800 mb-2 flex items-center gap-1">
+                                            📌 메모
+                                        </h3>
+                                        {currentDate ? (
+                                            <div>
+                                                <div className="text-xs text-gray-600 mb-2 font-semibold">
+                                                    {currentDate}-{dayOfWeek}
+                                                    {weekNum && <span className="text-gray-500 ml-1">({weekNum}주차)</span>}
+                                                </div>
+                                                <textarea
+                                                    value={currentMemo}
+                                                    onChange={(e) => setCurrentMemo(e.target.value)}
+                                                    placeholder="간단한 메모를 입력하세요..."
+                                                    className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-amber-500 focus:outline-none resize-none text-sm"
+                                                    rows={5}
+                                                />
+                                                {currentMemo && (
+                                                    <div className="mt-1 text-xs text-gray-500">{currentMemo.length}자</div>
+                                                )}
                                             </div>
-                                            <textarea
-                                                value={currentMemo}
-                                                onChange={(e) => setCurrentMemo(e.target.value)}
-                                                placeholder="간단한 메모..."
-                                                className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-amber-500 focus:outline-none resize-none text-sm"
-                                                rows={4}
-                                            />
-                                            {currentMemo && (
-                                                <div className="mt-1 text-xs text-gray-500">{currentMemo.length}자</div>
-                                            )}
-                                        </div>
-                                    ) : (
-                                        <div className="text-xs text-gray-500 text-center py-3">
-                                            날짜를 선택하면 메모를 작성할 수 있습니다
-                                        </div>
-                                    )}
+                                        ) : (
+                                            <div className="text-xs text-gray-500 text-center py-4 bg-gray-50 rounded-lg">
+                                                날짜를 선택하면 메모를 작성할 수 있습니다
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
