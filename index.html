@@ -38,6 +38,7 @@
         function MannaTracker() {
             const [allData, setAllData] = useState({});
             const [currentDate, setCurrentDate] = useState('');
+            const [currentTitle, setCurrentTitle] = useState('');
             const [currentText, setCurrentText] = useState('');
             const [currentSummary, setSummary] = useState('');
             const [currentMemo, setCurrentMemo] = useState('');
@@ -88,7 +89,7 @@
                 if (currentDate) {
                     saveCurrentDate();
                 }
-            }, [currentText, currentSummary, currentMemo]);
+            }, [currentTitle, currentText, currentSummary, currentMemo]);
 
             useEffect(() => {
                 if (currentDate) {
@@ -101,10 +102,11 @@
 
                 let newAllData = { ...allData };
 
-                if (!currentText.trim() && !currentSummary.trim() && !currentMemo.trim()) {
+                if (!currentTitle.trim() && !currentText.trim() && !currentSummary.trim() && !currentMemo.trim()) {
                     delete newAllData[currentDate];
                 } else {
                     newAllData[currentDate] = {
+                        title: currentTitle,
                         text: currentText,
                         summary: currentSummary,
                         memo: currentMemo,
@@ -148,10 +150,12 @@
 
             function loadDate(dateStr) {
                 if (allData[dateStr]) {
+                    setCurrentTitle(allData[dateStr].title || '');
                     setCurrentText(allData[dateStr].text || '');
                     setSummary(allData[dateStr].summary || '');
                     setCurrentMemo(allData[dateStr].memo || '');
                 } else {
+                    setCurrentTitle('');
                     setCurrentText('');
                     setSummary('');
                     setCurrentMemo('');
@@ -256,7 +260,11 @@
                         combinedText += `\n[ ${weekNum}주차 ]\n\n`;
                     }
                     
-                    combinedText += `【${entry.dayOfWeek} ${month}/${day}】\n`;
+                    combinedText += `【${entry.dayOfWeek} ${month}/${day}】`;
+                    if (entry.title) {
+                        combinedText += ` ${entry.title}`;
+                    }
+                    combinedText += `\n`;
                     
                     if (type === 'text' || type === 'all') {
                         if (entry.text) {
@@ -351,7 +359,11 @@
                         combinedText += `\n[ ${weekNum}주차 ]\n\n`;
                     }
                     
-                    combinedText += `【${entry.dayOfWeek} ${month}/${day}】\n`;
+                    combinedText += `【${entry.dayOfWeek} ${month}/${day}】`;
+                    if (entry.title) {
+                        combinedText += ` ${entry.title}`;
+                    }
+                    combinedText += `\n`;
                     
                     if (exportType === 'text' || exportType === 'all') {
                         if (entry.text) {
@@ -472,7 +484,7 @@
                             <div className="lg:col-span-2 space-y-6">
                                 {currentDate && (
                                     <>
-                                        {/* Main Text Input */}
+                                        {/* Title and Main Text Input */}
                                         <div className="bg-white rounded-lg shadow-md p-5">
                                             <div className="mb-3 flex items-center justify-between">
                                                 <h3 className="text-xl font-semibold text-gray-800">
@@ -480,6 +492,16 @@
                                                     {weekNum && <span className="text-sm text-gray-500 ml-2">({weekNum}주차)</span>}
                                                 </h3>
                                             </div>
+                                            
+                                            {/* Title Input */}
+                                            <input
+                                                type="text"
+                                                value={currentTitle}
+                                                onChange={(e) => setCurrentTitle(e.target.value)}
+                                                placeholder="📌 제목 / 주제를 입력하세요..."
+                                                className="w-full px-4 py-2 mb-3 border-2 border-gray-300 rounded-lg focus:border-amber-500 focus:outline-none font-semibold"
+                                            />
+                                            
                                             <textarea
                                                 value={currentText}
                                                 onChange={(e) => setCurrentText(e.target.value)}
@@ -554,7 +576,7 @@
                                                 <button
                                                     key={item.key}
                                                     onClick={() => handleDateChange(item.date)}
-                                                    className={`p-1 rounded text-center transition-all text-xs ${
+                                                    className={`p-1 rounded text-center transition-all text-xs relative ${
                                                         item.date === currentDate
                                                             ? 'bg-amber-500 text-white font-bold ring-2 ring-amber-600'
                                                             : item.hasData
@@ -563,63 +585,41 @@
                                                     }`}
                                                 >
                                                     <div className="font-bold">{item.day}</div>
+                                                    {allData[item.date]?.memo && (
+                                                        <div className="absolute top-0 right-1 text-amber-600 font-bold">•</div>
+                                                    )}
                                                 </button>
                                             )
                                         )}
                                     </div>
 
-                                    {/* Legend */}
-                                    <div className="mb-4 pb-4 border-b border-gray-200 text-xs space-y-1">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-3 h-3 bg-green-100 rounded"></div>
-                                            <span>작성 완료</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-3 h-3 bg-red-50 rounded"></div>
-                                            <span>미작성</span>
-                                        </div>
-                                    </div>
-
-                                    {/* Preview Section - 기본 사항 */}
+                                    {/* Legend and Title Input */}
                                     <div className="mb-4 pb-4 border-b border-gray-200">
-                                        <h3 className="text-sm font-semibold text-gray-800 mb-2">📋 기본 사항</h3>
-                                        {currentDate ? (
-                                            <div className="border-2 border-gray-800 rounded-lg p-3 bg-white min-h-[120px] max-h-[200px] overflow-y-auto">
-                                                <div className="text-xs text-gray-600 mb-2 font-semibold">
-                                                    {currentDate}-{dayOfWeek}
-                                                    {weekNum && <span className="text-gray-500 ml-1">({weekNum}주차)</span>}
-                                                </div>
-                                                
-                                                {currentText || currentSummary ? (
-                                                    <div className="space-y-2">
-                                                        {currentText && (
-                                                            <div>
-                                                                <div className="text-xs font-semibold text-blue-600 mb-1">📝 본문</div>
-                                                                <div className="text-xs text-gray-700 whitespace-pre-wrap">
-                                                                    {currentText.length > 100 ? currentText.substring(0, 100) + '...' : currentText}
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                        {currentSummary && (
-                                                            <div className="mt-2">
-                                                                <div className="text-xs font-semibold text-purple-600 mb-1">📋 요약</div>
-                                                                <div className="text-xs text-gray-700 whitespace-pre-wrap">
-                                                                    {currentSummary.length > 100 ? currentSummary.substring(0, 100) + '...' : currentSummary}
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                ) : (
-                                                    <div className="text-xs text-gray-400 text-center py-8">
-                                                        작성된 내용이 없습니다
-                                                    </div>
-                                                )}
+                                        <div className="text-xs space-y-1 mb-3">
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-3 h-3 bg-green-100 rounded"></div>
+                                                <span>작성 완료</span>
                                             </div>
-                                        ) : (
-                                            <div className="border-2 border-gray-800 rounded-lg p-3 bg-white min-h-[120px]">
-                                                <div className="text-xs text-gray-400 text-center py-8">
-                                                    날짜를 선택하세요
-                                                </div>
+                                            <div className="flex items-center gap-2">
+                                                <div className="w-3 h-3 bg-red-50 rounded"></div>
+                                                <span>미작성</span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-amber-600 font-bold">•</span>
+                                                <span>메모있음</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Title Input */}
+                                        {currentDate && (
+                                            <div className="mt-3">
+                                                <input
+                                                    type="text"
+                                                    value={currentTitle}
+                                                    onChange={(e) => setCurrentTitle(e.target.value)}
+                                                    placeholder="📌 제목 / 주제"
+                                                    className="w-full px-3 py-2 border-2 border-amber-300 rounded-lg focus:border-amber-500 focus:outline-none text-sm font-semibold bg-amber-50"
+                                                />
                                             </div>
                                         )}
                                     </div>
@@ -627,7 +627,7 @@
                                     {/* Memo Section */}
                                     <div>
                                         <h3 className="text-sm font-semibold text-gray-800 mb-2 flex items-center gap-1">
-                                            📌 메모
+                                            📝 메모
                                         </h3>
                                         {currentDate ? (
                                             <div>
@@ -640,7 +640,7 @@
                                                     onChange={(e) => setCurrentMemo(e.target.value)}
                                                     placeholder="간단한 메모를 입력하세요..."
                                                     className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:border-amber-500 focus:outline-none resize-none text-sm"
-                                                    rows={5}
+                                                    rows={8}
                                                 />
                                                 {currentMemo && (
                                                     <div className="mt-1 text-xs text-gray-500">{currentMemo.length}자</div>
